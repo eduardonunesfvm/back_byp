@@ -804,7 +804,7 @@ class AuthService:
         stored = self.refresh_token_repo.get_by_token(refresh_token)
         if stored is None:
             raise InvalidToken()
-        if stored.expires_at < datetime.now(timezone.utc):
+        if stored.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
             self.refresh_token_repo.delete(stored)
             raise TokenExpired()
         user = self.user_repo.get_by_id(stored.user_id)
