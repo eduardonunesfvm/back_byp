@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [develop, master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql+psycopg2://byp:byp_dev_password@localhost:5432/byp
+      TEST_DATABASE_URL: postgresql+psycopg2://byp:byp_dev_password@localhost:5432/byp_test
+      SECRET_KEY: change-me-ci-secret-key
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: byp
+          POSTGRES_PASSWORD: byp_dev_password
+          POSTGRES_DB: byp
+        ports:
+          - 5432:5432
+        volumes:
+          - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+        options: >-
+          --health-cmd "pg_isready -U byp -d byp"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Apply migrations
+        run: alembic upgrade head
+
+      - name: Run tests
+        run: pytest -q
