@@ -39,4 +39,7 @@ def decode_access_token(token: str) -> int:
         raise InvalidToken() from exc
     if payload.get("type") != "access" or payload.get("sub") is None:
         raise InvalidToken()
-    return int(payload["sub"])
+    try:
+        return int(payload["sub"])
+    except (TypeError, ValueError) as exc:
+        raise InvalidToken() from exc
