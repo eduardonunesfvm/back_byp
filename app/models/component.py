@@ -1,21 +1,9 @@
-import enum
 from datetime import datetime
 
 from sqlalchemy import JSON, DateTime, Integer, Numeric, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
-
-
-class ComponentCategory(str, enum.Enum):
-    cpu = "cpu"
-    gpu = "gpu"
-    ram = "ram"
-    storage = "storage"
-    motherboard = "motherboard"
-    psu = "psu"
-    case = "case"
-    cooling = "cooling"
 
 
 class Component(Base):

@@ -5,10 +5,11 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
+from app.core.config import settings
 from app.core.database import Base, get_db
 from app.main import app
 
-TEST_DATABASE_URL = os.getenv(
+TEST_DATABASE_URL = settings.TEST_DATABASE_URL or os.getenv(
     "TEST_DATABASE_URL",
     "postgresql+psycopg2://byp:byp_dev_password@127.0.0.1:5433/byp_test",
 )
