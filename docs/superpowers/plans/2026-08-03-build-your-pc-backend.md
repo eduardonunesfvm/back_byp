@@ -57,6 +57,7 @@ passlib==1.7.4
 bcrypt==4.0.1
 python-multipart==0.0.20
 pytest==8.3.4
+httpx==0.28.1
 ```
 
 - [ ] **Step 2: Criar `.gitignore`**
