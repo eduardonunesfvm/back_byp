@@ -1,27 +1,27 @@
-# Build Your PC Backend — Implementation Plan
+﻿# Build Your PC Backend â€” Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Criar o backend FastAPI do BYP — Build Your PC com autenticação JWT (register/login/refresh/logout/me) e catálogo de peças (CRUD + seed), em arquitetura em camadas.
+**Goal:** Criar o backend FastAPI do BYP â€” Build Your PC com autenticaÃ§Ã£o JWT (register/login/refresh/logout/me) e catÃ¡logo de peÃ§as (CRUD + seed), em arquitetura em camadas.
 
-**Architecture:** Camadas `router → service → repository → model/DB`. Schemas Pydantic cruzam as fronteiras; models nunca. Sessão via `get_db` (Dependency Injection). PostgreSQL via Docker Compose, migrações com Alembic.
+**Architecture:** Camadas `router â†’ service â†’ repository â†’ model/DB`. Schemas Pydantic cruzam as fronteiras; models nunca. SessÃ£o via `get_db` (Dependency Injection). PostgreSQL via Docker Compose, migraÃ§Ãµes com Alembic.
 
 **Tech Stack:** Python 3.12, FastAPI, Uvicorn, SQLAlchemy 2.0 (sync), Alembic, psycopg2-binary, Pydantic v2 + pydantic-settings, python-jose (JWT), passlib[bcrypt], pytest, PostgreSQL 16.
 
 ## Global Constraints
 
 - Python 3.12.10 (verificar com `python --version`).
-- Camadas rígidas: router → service → repository → model. Rota não acessa banco diretamente.
-- Schemas Pydantic são o contrato nas fronteiras; nunca expor models em rotas/services.
+- Camadas rÃ­gidas: router â†’ service â†’ repository â†’ model. Rota nÃ£o acessa banco diretamente.
+- Schemas Pydantic sÃ£o o contrato nas fronteiras; nunca expor models em rotas/services.
 - Resposta de erro padronizada: `{"detail": "mensagem"}`.
 - Categoria do componente: apenas `cpu`, `gpu`, `ram`, `storage`, `motherboard`, `psu`, `case`, `cooling`.
-- Senha mínima 8 caracteres; `email` válido; `price >= 0`.
-- Access token: JWT, exp 30min, claims `sub` (user id), `type=access`. Refresh token: string aleatória persistida em `refresh_tokens`, exp 7d, revogável.
+- Senha mÃ­nima 8 caracteres; `email` vÃ¡lido; `price >= 0`.
+- Access token: JWT, exp 30min, claims `sub` (user id), `type=access`. Refresh token: string aleatÃ³ria persistida em `refresh_tokens`, exp 7d, revogÃ¡vel.
 - Login aceita email OU username no campo `username` do OAuth2PasswordRequestForm.
-- Admin: coluna `is_admin` (bool, default False); dependency `get_current_admin` exige `is_admin=True` senão 403.
-- Versões pinadas em `requirements.txt` (ver Task 1). `passlib==1.7.4` + `bcrypt==4.0.1` (evita warning do passlib com bcrypt>=4.1).
+- Admin: coluna `is_admin` (bool, default False); dependency `get_current_admin` exige `is_admin=True` senÃ£o 403.
+- VersÃµes pinadas em `requirements.txt` (ver Task 1). `passlib==1.7.4` + `bcrypt==4.0.1` (evita warning do passlib com bcrypt>=4.1).
 - Rodar testes com PostgreSQL no ar (`docker compose up -d`), banco de teste `byp_test`.
-- Não commitar `.env`, `.venv/`, `__pycache__/`.
+- NÃ£o commitar `.env`, `.venv/`, `__pycache__/`.
 
 ---
 
@@ -39,7 +39,7 @@
 
 **Interfaces:**
 - Consumes: nada.
-- Produces: comando `docker compose up -d` sobe PostgreSQL na porta 5432; `pip install -r requirements.txt` instala as deps; `.env` fornece `DATABASE_URL`, `SECRET_KEY`, etc. para `app/core/config.py` (Task 2).
+- Produces: comando `docker compose up -d` sobe PostgreSQL na porta 5433; `pip install -r requirements.txt` instala as deps; `.env` fornece `DATABASE_URL`, `SECRET_KEY`, etc. para `app/core/config.py` (Task 2).
 
 - [ ] **Step 1: Criar `requirements.txt`**
 
@@ -74,8 +74,8 @@ __pycache__/
 - [ ] **Step 3: Criar `.env.example`**
 
 ```env
-DATABASE_URL=postgresql+psycopg2://byp:byp_dev_password@localhost:5432/byp
-TEST_DATABASE_URL=postgresql+psycopg2://byp:byp_dev_password@localhost:5432/byp_test
+DATABASE_URL=postgresql+psycopg2://byp:byp_dev_password@localhost:5433/byp
+TEST_DATABASE_URL=postgresql+psycopg2://byp:byp_dev_password@localhost:5433/byp_test
 SECRET_KEY=change-me-para-um-valor-aleatorio-longo
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 REFRESH_TOKEN_EXPIRE_DAYS=7
@@ -83,7 +83,7 @@ REFRESH_TOKEN_EXPIRE_DAYS=7
 
 - [ ] **Step 4: Copiar para `.env`**
 
-Copie o conteúdo do `.env.example` para `.env` (mesmos valores de exemplo; o `SECRET_KEY` pode ficar de exemplo nesta fase).
+Copie o conteÃºdo do `.env.example` para `.env` (mesmos valores de exemplo; o `SECRET_KEY` pode ficar de exemplo nesta fase).
 
 - [ ] **Step 5: Criar `docker-compose.yml`**
 
@@ -106,7 +106,7 @@ volumes:
   byp_pgdata:
 ```
 
-- [ ] **Step 6: Criar `db/init.sql`** (cria o banco de teste na inicialização)
+- [ ] **Step 6: Criar `db/init.sql`** (cria o banco de teste na inicializaÃ§Ã£o)
 
 ```sql
 CREATE DATABASE byp_test;
@@ -114,15 +114,15 @@ CREATE DATABASE byp_test;
 
 - [ ] **Step 7: Criar `app/__init__.py` e `app/core/__init__.py`** (arquivos vazios)
 
-- [ ] **Step 8: Subir o banco e instalar dependências**
+- [ ] **Step 8: Subir o banco e instalar dependÃªncias**
 
 Run: `docker compose up -d`
-Expected: container `byp_db` criado. `docker ps` mostra postgres na porta 5432.
+Expected: container `byp_db` criado. `docker ps` mostra postgres na porta 5433.
 
 Run: `python -m venv .venv; .\.venv\Scripts\Activate.ps1; pip install -r requirements.txt`
-Expected: instalação concluída sem erro.
+Expected: instalaÃ§Ã£o concluÃ­da sem erro.
 
-- [ ] **Step 9: Verificar versão do SQLAlchemy**
+- [ ] **Step 9: Verificar versÃ£o do SQLAlchemy**
 
 Run: `.\.venv\Scripts\python.exe -c "import sqlalchemy; print(sqlalchemy.__version__)"`
 Expected: `2.0.36`
@@ -136,7 +136,7 @@ git commit -m "chore: infraestrutura base do backend (env, docker, deps)"
 
 ---
 
-### Task 2: Configuração e banco (config.py, database.py)
+### Task 2: ConfiguraÃ§Ã£o e banco (config.py, database.py)
 
 **Files:**
 - Create: `app/core/config.py`
@@ -201,12 +201,12 @@ Expected: `ok`
 
 ```bash
 git add app/core/config.py app/core/database.py
-git commit -m "feat: configuração (pydantic-settings) e engine/sessão SQLAlchemy"
+git commit -m "feat: configuraÃ§Ã£o (pydantic-settings) e engine/sessÃ£o SQLAlchemy"
 ```
 
 ---
 
-### Task 3: Models SQLAlchemy + migração inicial Alembic
+### Task 3: Models SQLAlchemy + migraÃ§Ã£o inicial Alembic
 
 **Files:**
 - Create: `app/models/__init__.py`
@@ -215,11 +215,11 @@ git commit -m "feat: configuração (pydantic-settings) e engine/sessão SQLAlch
 - Create: `app/models/refresh_token.py`
 - Create: `alembic.ini` (via `alembic init alembic`)
 - Create: `alembic/env.py` (editado)
-- Create: `alembic/versions/*.py` (migração autogerada)
+- Create: `alembic/versions/*.py` (migraÃ§Ã£o autogerada)
 
 **Interfaces:**
 - Consumes: `Base`, `engine`, `settings` (Task 2).
-- Produces: tabelas `users`, `components`, `refresh_tokens` criadas no Postgres; models `User`, `Component`, `RefreshToken` usados pelos repositories (Tasks 6-7). Colunas obrigatórias: `User.id/email/username/password_hash/is_active/is_admin/created_at`; `Component.id/name/category/brand/price/specs/created_at`; `RefreshToken.id/user_id/token/expires_at/created_at`.
+- Produces: tabelas `users`, `components`, `refresh_tokens` criadas no Postgres; models `User`, `Component`, `RefreshToken` usados pelos repositories (Tasks 6-7). Colunas obrigatÃ³rias: `User.id/email/username/password_hash/is_active/is_admin/created_at`; `Component.id/name/category/brand/price/specs/created_at`; `RefreshToken.id/user_id/token/expires_at/created_at`.
 
 - [ ] **Step 1: Escrever `app/models/user.py`**
 
@@ -321,7 +321,7 @@ Expected: cria `alembic.ini`, `alembic/env.py`, `alembic/script.py.mako`, `alemb
 
 - [ ] **Step 6: Editar `alembic/env.py`**
 
-No topo, após os imports existentes, adicione:
+No topo, apÃ³s os imports existentes, adicione:
 
 ```python
 from app.core.config import settings
@@ -329,7 +329,7 @@ from app.core.database import Base
 import app.models  # noqa: F401
 ```
 
-No início de `run_migrations_offline` e de `run_migrations_online`, adicione (logo após a definição de `config` no escopo da função; no arquivo gerado é mais simples adicionar uma linha no topo da função ou antes do `engine_from_config`):
+No inÃ­cio de `run_migrations_offline` e de `run_migrations_online`, adicione (logo apÃ³s a definiÃ§Ã£o de `config` no escopo da funÃ§Ã£o; no arquivo gerado Ã© mais simples adicionar uma linha no topo da funÃ§Ã£o ou antes do `engine_from_config`):
 
 ```python
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
@@ -347,12 +347,12 @@ por:
 target_metadata = Base.metadata
 ```
 
-- [ ] **Step 7: Gerar a migração inicial**
+- [ ] **Step 7: Gerar a migraÃ§Ã£o inicial**
 
 Run: `.\.venv\Scripts\python.exe -m alembic revision --autogenerate -m "initial tables"`
 Expected: cria um arquivo em `alembic/versions/` com `create_table` para `users`, `components` e `refresh_tokens`. Revise o arquivo gerado para confirmar as 3 tabelas e as constraints (unique de email/username/token, FK de refresh_tokens.user_id com ondelete CASCADE).
 
-- [ ] **Step 8: Aplicar a migração**
+- [ ] **Step 8: Aplicar a migraÃ§Ã£o**
 
 Run: `.\.venv\Scripts\python.exe -m alembic upgrade head`
 Expected: `Running upgrade ... -> ..., initial tables`.
@@ -366,12 +366,12 @@ Expected: lista `alembic_version`, `components`, `refresh_tokens`, `users`.
 
 ```bash
 git add app/models alembic alembic.ini
-git commit -m "feat: models User/Component/RefreshToken e migração inicial"
+git commit -m "feat: models User/Component/RefreshToken e migraÃ§Ã£o inicial"
 ```
 
 ---
 
-### Task 4: Exceções de negócio + security (JWT/bcrypt)
+### Task 4: ExceÃ§Ãµes de negÃ³cio + security (JWT/bcrypt)
 
 **Files:**
 - Create: `app/core/exceptions.py`
@@ -379,7 +379,7 @@ git commit -m "feat: models User/Component/RefreshToken e migração inicial"
 
 **Interfaces:**
 - Consumes: `settings` (Task 2).
-- Produces: exceções `AppError`, `EmailAlreadyRegistered`, `UsernameAlreadyRegistered`, `InvalidCredentials`, `InvalidToken`, `TokenExpired`, `NotFound`, `PermissionDenied`; funções `hash_password`, `verify_password`, `create_access_token(user_id: int) -> str`, `generate_refresh_token() -> str`, `decode_access_token(token: str) -> int`. Usadas por services (Task 7), deps (Task 8) e main (Task 9).
+- Produces: exceÃ§Ãµes `AppError`, `EmailAlreadyRegistered`, `UsernameAlreadyRegistered`, `InvalidCredentials`, `InvalidToken`, `TokenExpired`, `NotFound`, `PermissionDenied`; funÃ§Ãµes `hash_password`, `verify_password`, `create_access_token(user_id: int) -> str`, `generate_refresh_token() -> str`, `decode_access_token(token: str) -> int`. Usadas por services (Task 7), deps (Task 8) e main (Task 9).
 
 - [ ] **Step 1: Escrever `app/core/exceptions.py`**
 
@@ -396,22 +396,22 @@ class AppError(Exception):
 
 class EmailAlreadyRegistered(AppError):
     status_code = 409
-    detail = "E-mail já cadastrado"
+    detail = "E-mail jÃ¡ cadastrado"
 
 
 class UsernameAlreadyRegistered(AppError):
     status_code = 409
-    detail = "Usuário já cadastrado"
+    detail = "UsuÃ¡rio jÃ¡ cadastrado"
 
 
 class InvalidCredentials(AppError):
     status_code = 401
-    detail = "Credenciais inválidas"
+    detail = "Credenciais invÃ¡lidas"
 
 
 class InvalidToken(AppError):
     status_code = 401
-    detail = "Token inválido"
+    detail = "Token invÃ¡lido"
 
 
 class TokenExpired(AppError):
@@ -421,12 +421,12 @@ class TokenExpired(AppError):
 
 class NotFound(AppError):
     status_code = 404
-    detail = "Recurso não encontrado"
+    detail = "Recurso nÃ£o encontrado"
 
 
 class PermissionDenied(AppError):
     status_code = 403
-    detail = "Permissão negada"
+    detail = "PermissÃ£o negada"
 ```
 
 - [ ] **Step 2: Escrever `app/core/security.py`**
@@ -485,7 +485,7 @@ Expected: `True` e `False`.
 
 ```bash
 git add app/core/exceptions.py app/core/security.py
-git commit -m "feat: exceções de negócio e security (bcrypt + JWT)"
+git commit -m "feat: exceÃ§Ãµes de negÃ³cio e security (bcrypt + JWT)"
 ```
 
 ---
@@ -498,7 +498,7 @@ git commit -m "feat: exceções de negócio e security (bcrypt + JWT)"
 - Create: `app/schemas/component.py`
 
 **Interfaces:**
-- Consumes: nada além do Pydantic.
+- Consumes: nada alÃ©m do Pydantic.
 - Produces: `UserCreate`, `UserRead`, `TokenPair`, `RefreshRequest`, `ComponentCreate`, `ComponentUpdate`, `ComponentRead`, e a categoria literal `ComponentCategoryLiteral`. Usados por routers/services (Tasks 7-9).
 
 - [ ] **Step 1: Escrever `app/schemas/user.py`**
@@ -603,9 +603,9 @@ git commit -m "feat: schemas Pydantic (user, component)"
 **Interfaces:**
 - Consumes: models (Task 3), schemas (Task 5).
 - Produces:
-  - `UserRepository(db)` — `get_by_id(user_id: int) -> User | None`, `get_by_username_or_email(login: str) -> User | None`, `email_exists(email: str) -> bool`, `username_exists(username: str) -> bool`, `create(email, username, password_hash) -> User`.
-  - `RefreshTokenRepository(db)` — `get_by_token(token) -> RefreshToken | None`, `create(user_id, token, expires_at) -> RefreshToken`, `delete(rt) -> None`, `delete_all_for_user(user_id) -> None`.
-  - `ComponentRepository(db)` — `list(category: str | None) -> list[Component]`, `get_by_id(component_id) -> Component | None`, `create(data: ComponentCreate) -> Component`, `update(comp, data: ComponentUpdate) -> Component`, `delete(comp) -> None`.
+  - `UserRepository(db)` â€” `get_by_id(user_id: int) -> User | None`, `get_by_username_or_email(login: str) -> User | None`, `email_exists(email: str) -> bool`, `username_exists(username: str) -> bool`, `create(email, username, password_hash) -> User`.
+  - `RefreshTokenRepository(db)` â€” `get_by_token(token) -> RefreshToken | None`, `create(user_id, token, expires_at) -> RefreshToken`, `delete(rt) -> None`, `delete_all_for_user(user_id) -> None`.
+  - `ComponentRepository(db)` â€” `list(category: str | None) -> list[Component]`, `get_by_id(component_id) -> Component | None`, `create(data: ComponentCreate) -> Component`, `update(comp, data: ComponentUpdate) -> Component`, `delete(comp) -> None`.
 
 - [ ] **Step 1: Escrever `app/repositories/user_repository.py`**
 
@@ -749,8 +749,8 @@ git commit -m "feat: repositories de user, refresh token e componente"
 **Interfaces:**
 - Consumes: repositories (Task 6), schemas (Task 5), security/exceptions (Task 4), `settings` (Task 2).
 - Produces:
-  - `AuthService(db, user_repo=None, refresh_token_repo=None)` — `register(data: UserCreate) -> User`, `login(login: str, password: str) -> TokenPair`, `refresh(refresh_token: str) -> TokenPair`, `logout(user_id: int) -> None`.
-  - `ComponentService(db, repo=None)` — `list(category: str | None) -> list[Component]`, `get(component_id: int) -> Component`, `create(data: ComponentCreate) -> Component`, `update(component_id: int, data: ComponentUpdate) -> Component`, `delete(component_id: int) -> None`.
+  - `AuthService(db, user_repo=None, refresh_token_repo=None)` â€” `register(data: UserCreate) -> User`, `login(login: str, password: str) -> TokenPair`, `refresh(refresh_token: str) -> TokenPair`, `logout(user_id: int) -> None`.
+  - `ComponentService(db, repo=None)` â€” `list(category: str | None) -> list[Component]`, `get(component_id: int) -> Component`, `create(data: ComponentCreate) -> Component`, `update(component_id: int, data: ComponentUpdate) -> Component`, `delete(component_id: int) -> None`.
 
 - [ ] **Step 1: Escrever `app/services/auth_service.py`**
 
@@ -879,7 +879,7 @@ git commit -m "feat: services de auth e componente"
 
 ---
 
-### Task 8: Dependencies de autenticação + router de auth + app main (esqueleto)
+### Task 8: Dependencies de autenticaÃ§Ã£o + router de auth + app main (esqueleto)
 
 **Files:**
 - Create: `app/routers/__init__.py`
@@ -1040,7 +1040,7 @@ from app.main import app
 
 TEST_DATABASE_URL = os.getenv(
     "TEST_DATABASE_URL",
-    "postgresql+psycopg2://byp:byp_dev_password@localhost:5432/byp_test",
+    "postgresql+psycopg2://byp:byp_dev_password@localhost:5433/byp_test",
 )
 
 engine = create_engine(TEST_DATABASE_URL)
@@ -1120,7 +1120,7 @@ git commit -m "feat: deps de auth, router auth e esqueleto do main + infra de te
 
 **Interfaces:**
 - Consumes: deps `get_current_admin` (Task 8), `ComponentService` (Task 7), schemas (Task 5).
-- Produces: endpoints `GET /api/v1/components`, `GET /api/v1/components/{id}`, `POST /api/v1/components`, `PUT /api/v1/components/{id}`, `DELETE /api/v1/components/{id}`; cobertura de testes de auth e catálogo.
+- Produces: endpoints `GET /api/v1/components`, `GET /api/v1/components/{id}`, `POST /api/v1/components`, `PUT /api/v1/components/{id}`, `DELETE /api/v1/components/{id}`; cobertura de testes de auth e catÃ¡logo.
 
 - [ ] **Step 1: Substituir `app/routers/components.py`**
 
@@ -1411,19 +1411,19 @@ Expected: todos os testes de `test_auth.py`, `test_components.py` e `test_app.py
 
 ```bash
 git add app/routers/components.py tests/test_auth.py tests/test_components.py
-git commit -m "feat: CRUD de componentes com regras de admin + testes de auth e catálogo"
+git commit -m "feat: CRUD de componentes com regras de admin + testes de auth e catÃ¡logo"
 ```
 
 ---
 
-### Task 10: Seed do catálogo
+### Task 10: Seed do catÃ¡logo
 
 **Files:**
 - Create: `seed.py`
 
 **Interfaces:**
 - Consumes: `SessionLocal` (Task 2), `ComponentService` (Task 7), `ComponentCreate` (Task 5).
-- Produces: catálogo populado no banco `byp` via `python seed.py`.
+- Produces: catÃ¡logo populado no banco `byp` via `python seed.py`.
 
 - [ ] **Step 1: Escrever `seed.py`**
 
@@ -1481,11 +1481,11 @@ def seed() -> None:
     try:
         service = ComponentService(db)
         if service.list():
-            print("Catálogo já populado. Nada a fazer.")
+            print("CatÃ¡logo jÃ¡ populado. Nada a fazer.")
             return
         for component in SEED:
             service.create(component)
-        print(f"Seed concluído: {len(SEED)} componentes inseridos.")
+        print(f"Seed concluÃ­do: {len(SEED)} componentes inseridos.")
     finally:
         db.close()
 
@@ -1497,36 +1497,36 @@ if __name__ == "__main__":
 - [ ] **Step 2: Rodar o seed**
 
 Run: `.\.venv\Scripts\python.exe seed.py`
-Expected: `Seed concluído: 10 componentes inseridos.`
+Expected: `Seed concluÃ­do: 10 componentes inseridos.`
 
 - [ ] **Step 3: Verificar via API (opcional)**
 
-Run: `.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload` e abrir `http://127.0.0.1:8000/docs`. Testar `GET /api/v1/components` — deve retornar os 10 itens; filtrar por `?category=cpu` — deve retornar 3.
+Run: `.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload` e abrir `http://127.0.0.1:8000/docs`. Testar `GET /api/v1/components` â€” deve retornar os 10 itens; filtrar por `?category=cpu` â€” deve retornar 3.
 
 - [ ] **Step 4: Commit**
 
 ```bash
 git add seed.py
-git commit -m "feat: seed do catálogo de componentes"
+git commit -m "feat: seed do catÃ¡logo de componentes"
 ```
 
 ---
 
-### Task 11: README e verificação final
+### Task 11: README e verificaÃ§Ã£o final
 
 **Files:**
 - Create: `README.md`
 
 **Interfaces:**
 - Consumes: tudo.
-- Produces: instruções de setup/runbook para qualquer dev.
+- Produces: instruÃ§Ãµes de setup/runbook para qualquer dev.
 
 - [ ] **Step 1: Escrever `README.md`**
 
 ```markdown
-# Build Your PC — Backend (FastAPI)
+# Build Your PC â€” Backend (FastAPI)
 
-Backend do BYP — Build Your PC. Autenticação JWT + catálogo de peças, em arquitetura em camadas (router → service → repository → model).
+Backend do BYP â€” Build Your PC. AutenticaÃ§Ã£o JWT + catÃ¡logo de peÃ§as, em arquitetura em camadas (router â†’ service â†’ repository â†’ model).
 
 ## Requisitos
 
@@ -1535,13 +1535,13 @@ Backend do BYP — Build Your PC. Autenticação JWT + catálogo de peças, em a
 
 ## Setup
 
-1. Copiar `.env.example` → `.env`.
+1. Copiar `.env.example` â†’ `.env`.
 2. Subir o banco: `docker compose up -d`.
 3. Criar venv e instalar deps:
    `python -m venv .venv` + `pip install -r requirements.txt`.
-4. Aplicar migrações: `alembic upgrade head`.
-5. Popular catálogo: `python seed.py`.
-6. Rodar: `uvicorn app.main:app --reload` — docs em `http://127.0.0.1:8000/docs`.
+4. Aplicar migraÃ§Ãµes: `alembic upgrade head`.
+5. Popular catÃ¡logo: `python seed.py`.
+6. Rodar: `uvicorn app.main:app --reload` â€” docs em `http://127.0.0.1:8000/docs`.
 
 ## Testes
 
@@ -1550,7 +1550,7 @@ Garantir `docker compose up -d` e rodar `pytest` (usa o banco `byp_test`).
 ## Endpoints
 
 - `POST /api/v1/auth/register`
-- `POST /api/v1/auth/login` (form: `username` aceita email ou usuário + `password`)
+- `POST /api/v1/auth/login` (form: `username` aceita email ou usuÃ¡rio + `password`)
 - `POST /api/v1/auth/refresh`
 - `GET /api/v1/auth/me`
 - `POST /api/v1/auth/logout`
@@ -1564,21 +1564,21 @@ Garantir `docker compose up -d` e rodar `pytest` (usa o banco `byp_test`).
 
 ```
 app/
-├── core/        (config, database, security, exceptions)
-├── models/      (SQLAlchemy)
-├── schemas/     (Pydantic)
-├── repositories/
-├── services/
-└── routers/
+â”œâ”€â”€ core/        (config, database, security, exceptions)
+â”œâ”€â”€ models/      (SQLAlchemy)
+â”œâ”€â”€ schemas/     (Pydantic)
+â”œâ”€â”€ repositories/
+â”œâ”€â”€ services/
+â””â”€â”€ routers/
 ```
 
 ## Admin
 
-Não há rota pública para criar admin. Para testes, crie o usuário e marque `is_admin=true`
+NÃ£o hÃ¡ rota pÃºblica para criar admin. Para testes, crie o usuÃ¡rio e marque `is_admin=true`
 direto no banco (ex.: `UPDATE users SET is_admin = true WHERE username = 'seu_usuario';`).
 ```
 
-- [ ] **Step 2: Rodar suíte completa**
+- [ ] **Step 2: Rodar suÃ­te completa**
 
 Run: `.\.venv\Scripts\python.exe -m pytest -v`
 Expected: todos os testes PASS.
@@ -1594,3 +1594,4 @@ Expected: `http://127.0.0.1:8000/` retorna `{"message": "Build Your PC API"}`.
 git add README.md
 git commit -m "docs: README com setup, runbook e endpoints"
 ```
+
