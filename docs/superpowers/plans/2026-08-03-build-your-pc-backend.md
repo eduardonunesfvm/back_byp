@@ -1,4 +1,4 @@
-﻿# Build Your PC Backend â€” Implementation Plan
+# Build Your PC Backend â€” Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -74,8 +74,8 @@ __pycache__/
 - [ ] **Step 3: Criar `.env.example`**
 
 ```env
-DATABASE_URL=postgresql+psycopg2://byp:byp_dev_password@localhost:5433/byp
-TEST_DATABASE_URL=postgresql+psycopg2://byp:byp_dev_password@localhost:5433/byp_test
+DATABASE_URL=postgresql+psycopg2://byp:byp_dev_password@127.0.0.1:5433/byp
+TEST_DATABASE_URL=postgresql+psycopg2://byp:byp_dev_password@127.0.0.1:5433/byp_test
 SECRET_KEY=change-me-para-um-valor-aleatorio-longo
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 REFRESH_TOKEN_EXPIRE_DAYS=7
@@ -1040,7 +1040,7 @@ from app.main import app
 
 TEST_DATABASE_URL = os.getenv(
     "TEST_DATABASE_URL",
-    "postgresql+psycopg2://byp:byp_dev_password@localhost:5433/byp_test",
+    "postgresql+psycopg2://byp:byp_dev_password@127.0.0.1:5433/byp_test",
 )
 
 engine = create_engine(TEST_DATABASE_URL)
